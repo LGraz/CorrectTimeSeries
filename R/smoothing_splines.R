@@ -97,43 +97,52 @@ CorrectResponse <- function(df, RF) {
 #         timeseries_list[[id]] <- df[keep_collumns]
 #     }
 #     usethis::use_data(timeseries_list)
-#     RF_for_NDVI <- readRDS("/home/lukas/Documents/ETH/MASTER_THESIS/code/data/computation_results/ml_models/R_small/ml_randomForest_randomForest_rf_randomForest_ss_noex_rob_rew_1.rds", refhook = function(x) NULL)
+# RF_for_NDVI <- readRDS("/home/lukas/Documents/ETH/MASTER_THESIS/code/data/computation_results/ml_models/R_small/ml_randomForest_randomForest_rf_randomForest_ss_noex_rob_rew_1.rds", refhook = function(x) NULL)
+# RF_for_NDVI_uncertainty <- readRDS("/home/lukas/Documents/ETH/MASTER_THESIS/code/data/computation_results/ml_models/R_small/ml_randomForest_randomForest_rf_res_randomForest_ss_noex_rob_rew_1.rds", refhook = function(x) NULL)
 #     usethis::use_data(RF_for_NDVI)
+# usethis::use_data(RF_for_NDVI_uncertainty)
 # }
 
 
 ############################################
 ##  EXAMPLE
 ############################################
-# # load a list of dataframes, each one describes one pixel with the covariates and the response
-# data(timeseries_list)
-# str(timeseries_list[[1]])
+# load a list of dataframes, each one describes one pixel with the covariates and the response
+data(timeseries_list)
+str(timeseries_list[[1]])
 
-# # Train/Load  RF
-# train_model_myself <- TRUE
-# if (train_model_myself){
-#     # Add "true" NDVI (or generally the response), by Out-Of-Bag estimation
-#     timeseries_list <- lapply(timeseries_list, function(df) {
-#         df$oob_ndvi <- OOB_est(df$gdd, df$ndvi_observed) # gdd is the time-axis
-#         df
-#     })
-#     # Train correction model
-#     formula <- "oob_ndvi ~ B02+B03+B04+B05+B06+B07+B08+B8A+B11+B12+scl_class"
-#     RF <- train_RF_with_fromula(formula, timeseries_list, robustify=TRUE)
-# } else {
-#     data(RF_for_NDVI)
-#     RF <- RF_for_NDVI
-# }
+# Train/Load  RF
+train_model_myself <- FALSE
+if (train_model_myself) {
+    # Add "true" NDVI (or generally the response), by Out-Of-Bag estimation
+    timeseries_list <- lapply(timeseries_list, function(df) {
+        df$oob_ndvi <- OOB_est(df$gdd, df$ndvi_observed) # gdd is the time-axis
+        df
+    })
+    # Train correction model
+    formula <- "oob_ndvi ~ B02+B03+B04+B05+B06+B07+B08+B8A+B11+B12+scl_class"
+    RF <- train_RF_with_fromula(formula, timeseries_list, robustify = TRUE)
+    stop("also need to train model for uncertainty")
+} else {
+    data(RF_for_NDVI)
+    data(RF_for_NDVI_uncertainty)
+    RF <- RF_for_NDVI
+    RF_uncert <- RF_for_NDVI_uncertainty
+}
 
-# # ADD CORRECTION
-# timeseries_list <- lapply(timeseries_list, function(df) {
-#     df$corrected_ndvi <- randomForest:::predict.randomForest(RF, df)
-#     df
-# })
+# ADD CORRECTION
+timeseries_list <- lapply(timeseries_list, function(df) {
+    df$corrected_ndvi <- randomForest:::predict.randomForest(RF, df)
+    df
+})
 
-# # Get interpolation for each timeseries
-# newx <- 1:1000
-# lapply(timeseries_list, function(df){
-#     ss <- smoothing_spline(df$gdd, df$corrected_ndvi)
-#     predict(ss, newx)$y
-# })
+# Get interpolation for each timeseries
+newx <- 1:1000
+lapply(timeseries_list, function(df) {
+    linkfun <- function(x) {
+        1 / x
+    }
+    w <-  linkfun(randomForest:::predict.randomForest(RF_uncert, df))
+    ss <- smoothing_spline(df$gdd, df$corrected_ndvi, w = w)
+    predict(ss, newx)$y
+})
