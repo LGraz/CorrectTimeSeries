@@ -7,7 +7,9 @@ The theory is discribed in the Master Thesis of Lukas Graz which can be found [h
 The Sentinel 2 satelites make every 5 days an image of a specific location (in our example a Farm). We can use 2 of the 10 spectral bands to calcualte the NDVI. However, due to atmospheric phenomena like clouds certain images might be not trustworthy. Thus we can correct the time series, using the additional information and interpolating, by giving uncertain points less weight. 
 
 ## How To Install
-`> devtools::install_github("Greeenstone/CorrectTimeSeries")`
+```r
+> devtools::install_github("LGraz/CorrectTimeSeries")
+ ```
 
 ## How To Use: Example
 ```r
