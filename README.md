@@ -1,10 +1,10 @@
-## What is this
-This `R` package can be used to correct and interpolate timeseries if additional data is aviable. 
+## What does this Package do?
+This `R` package can be used to correct and interpolate time series if additional data is available. 
 
-The theory is discribed in the Master Thesis of Lukas Graz which can be found [here](https://github.com/LGraz/MasterThesis-Documentation) and the related codebase [here](https://github.com/LGraz/MasterThesis-Code).
+The theory is described in the Master Thesis of Lukas Graz which can be found [here](https://github.com/LGraz/MasterThesis-Documentation) and the related codebase [here](https://github.com/LGraz/MasterThesis-Code).
 
 ### Example: NDVI Interpolation
-The Sentinel 2 satelites make every 5 days an image of a specific location (in our example a Farm). We can use 2 of the 10 spectral bands to calcualte the NDVI. However, due to atmospheric phenomena like clouds certain images might be not trustworthy. Thus we can correct the time series, using the additional information and interpolating, by giving uncertain points less weight. 
+The Sentinel 2 satellites make every 5 days an image of a specific location (in our example a Farm). We can use 2 of the 10 spectral bands to calculate the NDVI. However, due to atmospheric phenomena like clouds certain images might be not trustworthy. Thus, we can correct the time series, using the additional information and interpolating, by giving uncertain points less weight. 
 
 ## How To Install
 ```r
