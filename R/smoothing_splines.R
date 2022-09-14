@@ -37,7 +37,7 @@ OOB_est <- function(x, y, robustify = TRUE, w = NULL, ...) {
 #' train an RandomForest using `formula`
 #'
 #' @export
-train_RF_with_fromula <- function(formula, timeseries_list, robustify = TRUE) {
+train_RF_with_fromula <- function(formula, timeseries_list, robustify = TRUE, ...) {
     stopifnot(is.list(timeseries_list))
     stopifnot(is.data.frame(timeseries_list[[1]]))
     RF <- randomForest::randomForest(as.formula(formula),
@@ -49,7 +49,7 @@ train_RF_with_fromula <- function(formula, timeseries_list, robustify = TRUE) {
                 NULL
             })
             RF_training_data
-    })
+    }, ...)
     rm(RF_training_data) # free memory
     RF
 }
